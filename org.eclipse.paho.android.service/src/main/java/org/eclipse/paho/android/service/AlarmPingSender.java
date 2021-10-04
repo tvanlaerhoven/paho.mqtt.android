@@ -126,6 +126,7 @@ class AlarmPingSender implements MqttPingSender {
 
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.d(TAG, "Ping async task : Success.");
                     success = true;
                 }
 
@@ -147,14 +148,14 @@ class AlarmPingSender implements MqttPingSender {
             } catch (Exception ex) {
                 Log.d(TAG, "Ping async background : Ignore unknown exception : " + ex.getMessage());
             }
-            if (success == false) {
+            if (!success) {
                 Log.d(TAG, "Ping async background task completed at " + System.currentTimeMillis() + " Success is " + success);
             }
             return new Boolean(success);
         }
 
         protected void onPostExecute(Boolean success) {
-            if (success == false) {
+            if (!success) {
                 Log.d(TAG, "Ping async task onPostExecute() Success is " + this.success);
             }
         }
@@ -184,7 +185,7 @@ class AlarmPingSender implements MqttPingSender {
 
             PowerManager pm = (PowerManager) service.getSystemService(Service.POWER_SERVICE);
             wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag);
-            wakelock.acquire();
+            Log.d(TAG, "Acquire wakelock for AlarmReceiver");
 
             if (pingRunner != null) {
                 if (pingRunner.cancel(true)) {
@@ -196,7 +197,9 @@ class AlarmPingSender implements MqttPingSender {
             pingRunner.execute(comms);
 
             if (wakelock.isHeld()) {
+                Log.d(TAG, "Releasing wakelock for AlarmReceiver");
                 wakelock.release();
+                Log.d(TAG, "Released wakelock for AlarmReceiver");
             }
         }
     }
